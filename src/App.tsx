@@ -35,7 +35,7 @@ const App: Component = () => {
 			if (patternCheck().hasPattern) return;
 
 			if (turn === 2) {
-				appendSymbol(minimax(state(), 1));
+				appendSymbol(minimax(state(), 10));
 			}
 		})
 	);
