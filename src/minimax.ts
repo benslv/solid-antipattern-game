@@ -69,7 +69,9 @@ export function minimax(state: State, depth = 1): Pebble {
 		}
 	}
 
-	return bestMove ?? Math.random() < 0.5
+	if (bestMove) return bestMove;
+
+	return Math.random() < 0.5
 		? possibleMoves[0].pebble
 		: possibleMoves[1].pebble;
 }
