@@ -2,13 +2,16 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
+	on,
 	Show,
 	type Component,
 } from "solid-js";
-import { checkForPattern, Pebble } from "./util/checkForPattern";
+import { minimax } from "./minimax";
+import { Pebble, State } from "./types";
+import { checkForPattern } from "./util/checkForPattern";
 
 const App: Component = () => {
-	const [state, setState] = createSignal<Array<Pebble>>([]);
+	const [state, setState] = createSignal<State>([]);
 	const [turn, setTurn] = createSignal<1 | 2>(1);
 
 	const appendSymbol = (d: Pebble) => {
@@ -18,19 +21,15 @@ const App: Component = () => {
 
 	const patternExists = createMemo(() => checkForPattern(state()));
 
-	createEffect(() => {
-		// Computer makes its guess
-		if (turn() === 2) {
-			let pebble: Pebble = Math.random() > 0.5 ? "○" : "●";
+	createEffect(
+		on(turn, (turn) => {
+			if (patternExists().hasPattern) return;
 
-			// If the current guess would result in a loss for the computer, switch to the opposite colour.
-			if (checkForPattern([...state(), pebble]).length > 0) {
-				pebble = pebble === "○" ? "●" : "○";
+			if (turn === 2) {
+				appendSymbol(minimax(state(), 10));
 			}
-
-			appendSymbol(pebble);
-		}
-	});
+		})
+	);
 
 	return (
 		<>
@@ -43,10 +42,19 @@ const App: Component = () => {
 			</div>
 			<div>
 				<Show
-					when={patternExists().length > 0}
+					when={patternExists().hasPattern ? patternExists() : null}
 					fallback={"No pattern yet..."}
+					keyed
 				>
-					Pattern found! {patternExists().at(0)}
+					{(pattern) => (
+						<>
+							<p>
+								Pattern found!{" "}
+								{pattern.hasPattern ? pattern.pattern : null}
+							</p>
+							<p>Player {turn()} wins!</p>
+						</>
+					)}
 				</Show>
 			</div>
 		</>
