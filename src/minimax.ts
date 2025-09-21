@@ -1,13 +1,26 @@
 import { Pebble, State } from "./types";
 import { checkForPattern } from "./util/checkForPattern";
 
+function getPossibleMoves(
+	state: State
+): Array<{ pebble: Pebble; state: State }> {
+	return [
+		{
+			pebble: "○",
+			state: [...state, "○"],
+		},
+		{
+			pebble: "●",
+			state: [...state, "●"],
+		},
+	];
+}
+
 function minimaxRecursive(
 	state: State,
 	depth: number,
 	isMaximising: boolean
 ): number {
-	console.log({ depth });
-
 	const { hasPattern } = checkForPattern(state);
 
 	if (hasPattern) {
@@ -18,16 +31,7 @@ function minimaxRecursive(
 		return 0;
 	}
 
-	const possibleMoves: Array<{ pebble: Pebble; state: State }> = [
-		{
-			pebble: "○",
-			state: [...state, "○"],
-		},
-		{
-			pebble: "●",
-			state: [...state, "●"],
-		},
-	];
+	const possibleMoves = getPossibleMoves(state);
 
 	if (isMaximising) {
 		let maxEval = -Infinity;
@@ -54,16 +58,7 @@ export function minimax(state: State, depth = 1): Pebble {
 	let bestScore = -Infinity;
 	let bestMove: Pebble | null = null;
 
-	const possibleMoves: Array<{ pebble: Pebble; state: State }> = [
-		{
-			pebble: "○",
-			state: [...state, "○"],
-		},
-		{
-			pebble: "●",
-			state: [...state, "●"],
-		},
-	];
+	const possibleMoves = getPossibleMoves(state);
 
 	for (const move of possibleMoves) {
 		const score = minimaxRecursive(move.state, depth - 1, false);
@@ -74,11 +69,7 @@ export function minimax(state: State, depth = 1): Pebble {
 		}
 	}
 
-	if (bestMove === null) {
-		return Math.random() < 0.5
-			? possibleMoves[0].pebble
-			: possibleMoves[1].pebble;
-	}
-
-	return bestMove;
+	return bestMove ?? Math.random() < 0.5
+		? possibleMoves[0].pebble
+		: possibleMoves[1].pebble;
 }
